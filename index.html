@@ -72,6 +72,13 @@
         },
         {
           "data": {
+            "url": "https://jinrecords.github.io/FIT3179-Vega-lite-hw/ne_110m_graticules_1.json",
+            "format": {"type": "topojson", "feature": "ne_110m_graticules_1"}
+          },
+          "mark": {"type": "geoshape", "fill": "none", "stroke": "#E0E0E0", "strokeOpacity": 0.5}
+        },
+        {
+          "data": {
             "url": "ne_10m_admin_1_states_provinces.json",
             "format": {"type": "topojson", "feature": "ne_10m_admin_1_states_provinces"}
           },
@@ -80,9 +87,10 @@
         {
           "data": {"url": "processed_rainfall_data.csv"},
           "transform": [
+            {"calculate": "datum.STATE == 'Melaka' ? 'Malacca' : (datum.STATE == 'Wilayah Persekutuan Labuan' ? 'Labuan' : datum.STATE)", "as": "geo_state_name"},
             {"filter": "datum.YEAR == year_selection"},
             {
-              "lookup": "STATE",
+              "lookup": "geo_state_name",
               "from": {
                 "data": {
                   "url": "ne_10m_admin_1_states_provinces.json",
@@ -114,13 +122,6 @@
               {"field": "NUMBER OF DAYS OF RAINFALL", "type": "quantitative", "title": "Days of rainfall"}
             ]
           }
-        },
-        {
-          "data": {
-            "url": "https://jinrecords.github.io/FIT3179-Vega-lite-hw/ne_110m_graticules_1.json",
-            "format": {"type": "topojson", "feature": "ne_110m_graticules_1"}
-          },
-          "mark": {"type": "geoshape", "fill": "none", "stroke": "#E0E0E0", "strokeOpacity": 0.5}
         }
       ]
     };
