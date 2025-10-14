@@ -28,6 +28,9 @@
     <div class="vis-container">
       <div id="vis_lollipop"></div>
     </div>
+    <div class="vis-container">
+      <div id="vis_area"></div>
+    </div>
     <div class="source">
       Source:
       <a
@@ -321,6 +324,28 @@
         ]
       };
       vegaEmbed("#vis_lollipop", spec_lollipop, { actions: false });
+
+      const spec_area = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "title": "Total Number of People Affected per Year",
+        "width": 800,
+        "height": 500,
+        "data": { "url": "cleaned_disaster_data.csv" },
+        "transform": [{
+          "aggregate": [{"op": "sum", "field": "Total Affected", "as": "total_affected"}],
+          "groupby": ["YEAR"]
+        }],
+        "encoding": {
+          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
+          "y": { "field": "total_affected", "type": "quantitative", "title": "Total Number of People Affected" }
+        },
+        "layer": [
+          { "mark": "area" },
+          { "mark": "line" },
+          { "mark": "point" }
+        ]
+      };
+      vegaEmbed("#vis_area", spec_area, { actions: false });
     </script>
   </body>
 </html>
