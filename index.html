@@ -168,13 +168,20 @@
         "width": 400,
         "height": 400,
         "data": {"url": "cleaned_disaster_data.csv"},
-        "params": [{
-          "name": "year_selection",
-          "value": 2010,
-          "bind": {"input": "range", "min": 2000, "max": 2021, "step": 1, "name": "Year"}
-        }],
+        "params": [
+          {
+            "name": "year_selection",
+            "value": 2010,
+            "bind": {"input": "range", "min": 2000, "max": 2021, "step": 1, "name": "Year"}
+          },
+          {
+            "name": "is_data_empty",
+            "expr": "length(data('donut_data')) == 0"
+          }
+        ],
         "layer": [
           {
+            "name": "donut_data",
             "transform": [
               {"filter": "datum.YEAR == year_selection"},
               {"calculate": "isValid(datum.Origin) && datum.Origin !== '' ? datum.Origin : 'No data'", "as": "origin_tooltip"},
@@ -200,40 +207,38 @@
             }
           },
           {
-            "transform": [
-              {"filter": "datum.YEAR == year_selection"},
-              {"aggregate": [{"op": "count", "as": "count"}]}
-            ],
-            "layer": [
-              {
-                "mark": {
-                  "type": "text",
-                  "fontSize": 40,
-                  "fontWeight": "bold"
+            "data": {"values": [{}]},
+            "mark": {"type": "text"},
+            "encoding": {
+              "text": {
+                "condition": {
+                  "test": "is_data_empty",
+                  "expr": "'No data for year ' + year_selection"
                 },
-                "encoding": {
-                  "text": {"expr": "year_selection"},
-                  "opacity": {
-                    "condition": {"test": "datum.count > 0", "value": 1},
-                    "value": 0
-                  }
-                }
+                "expr": "year_selection"
               },
-              {
-                "mark": {
-                  "type": "text",
-                  "color": "grey",
-                  "fontSize": 20
+              "color": {
+                "condition": {
+                  "test": "is_data_empty",
+                  "value": "grey"
                 },
-                "encoding": {
-                  "text": {"expr": "'No data for year ' + year_selection"},
-                  "opacity": {
-                    "condition": {"test": "datum.count === 0", "value": 1},
-                    "value": 0
-                  }
-                }
+                "value": "black"
+              },
+              "fontSize": {
+                "condition": {
+                  "test": "is_data_empty",
+                  "value": 20
+                },
+                "value": 40
+              },
+              "fontWeight": {
+                "condition": {
+                  "test": "is_data_empty",
+                  "value": "normal"
+                },
+                "value": "bold"
               }
-            ]
+            }
           }
         ]
       };
