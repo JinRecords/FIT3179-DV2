@@ -31,6 +31,9 @@
     <div class="vis-container">
       <div id="vis_area"></div>
     </div>
+    <div class="vis-container">
+      <div id="vis_multiline"></div>
+    </div>
     <div class="source">
       Source:
       <a
@@ -346,6 +349,36 @@
         ]
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
+
+      const spec_multiline = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "title": "Total Annual Rainfall in East vs West Malaysia (2000-2021)",
+        "width": 800,
+        "height": 500,
+        "data": { "url": "processed_rainfall_data.csv" },
+        "transform": [
+          {
+            "calculate": "datum.STATE == 'Sabah' || datum.STATE == 'Sarawak' || datum.STATE == 'Wilayah Persekutuan Labuan' ? 'East Malaysia' : 'West Malaysia'",
+            "as": "Region"
+          },
+          {
+            "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
+            "groupby": ["YEAR", "Region"]
+          }
+        ],
+        "mark": "line",
+        "encoding": {
+          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
+          "y": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)" },
+          "color": { "field": "Region", "type": "nominal", "title": "Region" },
+          "tooltip": [
+              { "field": "YEAR", "type": "ordinal", "title": "Year" },
+              { "field": "Region", "type": "nominal", "title": "Region" },
+              { "field": "total_rainfall", "type": "quantitative", "title": "Total Rainfall (mm)", "format": ".2f" }
+          ]
+        }
+      };
+      vegaEmbed("#vis_multiline", spec_multiline, { actions: false });
     </script>
   </body>
 </html>
