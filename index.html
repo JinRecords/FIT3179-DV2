@@ -163,75 +163,125 @@
       vegaEmbed("#vis_map", spec_map, { actions: false });
 
       const spec_donut = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Disaster Subtypes",
-        "width": 400,
-        "height": 400,
-        "data": {"url": "cleaned_disaster_data.csv"},
-        "params": [
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Disaster Subtypes",
+        width: 400,
+        height: 400,
+        data: { url: "cleaned_disaster_data.csv" },
+        params: [
           {
-            "name": "year_selection",
-            "value": 2010,
-            "bind": {"input": "range", "min": 2000, "max": 2021, "step": 1, "name": "Year"}
-          }
-        ],
-        "layer": [
-          {
-            "name": "donut_data",
-            "transform": [
-              {"filter": "datum.YEAR == year_selection"},
-              {"calculate": "isValid(datum.Origin) && datum.Origin !== '' ? datum.Origin : 'No data'", "as": "origin_tooltip"},
-              {"calculate": "isValid(datum['Total Affected']) ? datum['Total Affected'] : 'No data'", "as": "affected_tooltip"},
-              {"calculate": "isValid(datum['Total Deaths']) ? datum['Total Deaths'] : 'No data'", "as": "deaths_tooltip"}
-            ],
-            "mark": {"type": "arc", "innerRadius": 80},
-            "encoding": {
-              "theta": {"aggregate": "count", "type": "quantitative"},
-              "color": {
-                "field": "Disaster Subtype",
-                "type": "nominal",
-                "scale": {
-                  "domain": ["Flash flood", "Flood (General)", "Riverine flood", "Landslide (wet)", "Drought"]
-                }
-              },
-              "tooltip": [
-                {"field": "Disaster Subtype", "type": "nominal"},
-                {"field": "origin_tooltip", "type": "nominal", "title": "Origin"},
-                {"field": "affected_tooltip", "type": "nominal", "title": "Total Affected"},
-                {"field": "deaths_tooltip", "type": "nominal", "title": "Total Deaths"}
-              ]
-            }
-          },
-          {
-            "data": {"values": [{}]},
-            "transform": [
-              {"calculate": "length(data('donut_data')) > 0", "as": "has_data"}
-            ],
-            "mark": {
-              "type": "text",
-              "fontWeight": "bold"
+            name: "year_selection",
+            value: 2010,
+            bind: {
+              input: "range",
+              min: 2000,
+              max: 2025,
+              step: 1,
+              name: "Year",
             },
-            "encoding": {
-              "text": {"expr": "year_selection"},
-              "color": {"value": "black"},
-              "size": {"value": 40},
-              "opacity": {"condition": {"test": "datum.has_data", "value": 1}, "value": 0}
-            }
+          },
+        ],
+        layer: [
+          {
+            transform: [
+              { filter: "datum.YEAR == year_selection" },
+              {
+                calculate:
+                  "isValid(datum.Origin) && datum.Origin !== '' ? datum.Origin : 'No data'",
+                as: "origin_tooltip",
+              },
+              {
+                calculate:
+                  "isValid(datum['Total Affected']) ? datum['Total Affected'] : 'No data'",
+                as: "affected_tooltip",
+              },
+              {
+                calculate:
+                  "isValid(datum['Total Deaths']) ? datum['Total Deaths'] : 'No data'",
+                as: "deaths_tooltip",
+              },
+            ],
+            mark: { type: "arc", innerRadius: 80 },
+            encoding: {
+              theta: { aggregate: "count", type: "quantitative" },
+              color: {
+                field: "Disaster Subtype",
+                type: "nominal",
+                scale: {
+                  domain: [
+                    "Flash flood",
+                    "Flood (General)",
+                    "Riverine flood",
+                    "Landslide (wet)",
+                    "Drought",
+                  ],
+                  scheme: "category10",
+                },
+                legend: { title: "Disaster Type" },
+              },
+              tooltip: [
+                {
+                  field: "Disaster Subtype",
+                  type: "nominal",
+                  title: "Disaster Type",
+                },
+                { field: "origin_tooltip", type: "nominal", title: "Origin" },
+                {
+                  field: "affected_tooltip",
+                  type: "nominal",
+                  title: "Total Affected",
+                },
+                {
+                  field: "deaths_tooltip",
+                  type: "nominal",
+                  title: "Total Deaths",
+                },
+              ],
+            },
           },
           {
-            "data": {"values": [{}]},
-            "transform": [
-              {"calculate": "length(data('donut_data')) == 0", "as": "is_empty"}
+            data: { url: "cleaned_disaster_data.csv" },
+            transform: [
+              { filter: "datum.YEAR == year_selection" },
+              { aggregate: [{ op: "count", as: "disaster_count" }] },
+              {
+                calculate:
+                  "datum.disaster_count > 0 ? year_selection : 'No data'",
+                as: "display_text",
+              },
+              {
+                calculate: "datum.disaster_count > 0 ? 40 : 16",
+                as: "font_size",
+              },
             ],
-            "mark": "text",
-            "encoding": {
-              "text": {"expr": "'No data for year ' + year_selection"},
-              "color": {"value": "grey"},
-              "size": {"value": 20},
-              "opacity": {"condition": {"test": "datum.is_empty", "value": 1}, "value": 0}
-            }
-          }
-        ]
+            mark: {
+              type: "text",
+              fontSize: { expr: "datum.font_size" },
+              fontWeight: "bold",
+            },
+            encoding: {
+              text: { field: "display_text", type: "nominal" },
+            },
+          },
+          {
+            data: { url: "cleaned_disaster_data.csv" },
+            transform: [
+              { filter: "datum.YEAR == year_selection" },
+              { aggregate: [{ op: "count", as: "disaster_count" }] },
+              { filter: "datum.disaster_count == 0" },
+              { calculate: "'for ' + year_selection", as: "subtitle_text" },
+            ],
+            mark: {
+              type: "text",
+              dy: 20,
+              fontSize: 14,
+              color: "gray",
+            },
+            encoding: {
+              text: { field: "subtitle_text", type: "nominal" },
+            },
+          },
+        ],
       };
       vegaEmbed("#vis_donut", spec_donut, { actions: false });
     </script>
