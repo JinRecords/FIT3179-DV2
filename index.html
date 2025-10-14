@@ -25,6 +25,9 @@
       <div id="vis_donut"></div>
     </div>
 
+    <div class="vis-container">
+      <div id="vis_lollipop"></div>
+    </div>
     <div class="source">
       Source:
       <a
@@ -175,7 +178,7 @@
             bind: {
               input: "range",
               min: 2000,
-              max: 2025,
+              max: 2021,
               step: 1,
               name: "Year",
             },
@@ -283,6 +286,41 @@
         ],
       };
       vegaEmbed("#vis_donut", spec_donut, { actions: false });
+
+      const spec_lollipop = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "title": "Total Annual Rainfall in Malaysia from 2000 - 2021",
+        "width": 800,
+        "height": 500,
+        "data": { "url": "processed_rainfall_data.csv" },
+        "transform": [{
+          "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
+          "groupby": ["YEAR"]
+        }],
+        "encoding": {
+          "y": { "field": "YEAR", "type": "ordinal", "title": "Year", "axis": { "grid": false } },
+          "x": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)", "axis": { "grid": true } }
+        },
+        "layer": [
+          {
+            "mark": "rule"
+          },
+          {
+            "mark": {
+              "type": "point",
+              "filled": true,
+              "size": 100
+            },
+            "encoding": {
+              "tooltip": [
+                  { "field": "YEAR", "type": "ordinal", "title": "Year" },
+                  { "field": "total_rainfall", "type": "quantitative", "title": "Total Rainfall (mm)", "format": ".2f" }
+              ]
+            }
+          }
+        ]
+      };
+      vegaEmbed("#vis_lollipop", spec_lollipop, { actions: false });
     </script>
   </body>
 </html>
