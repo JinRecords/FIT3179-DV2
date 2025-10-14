@@ -184,7 +184,13 @@
             "mark": {"type": "arc", "innerRadius": 80},
             "encoding": {
               "theta": {"aggregate": "count", "type": "quantitative"},
-              "color": {"field": "Disaster Subtype", "type": "nominal"},
+              "color": {
+                "field": "Disaster Subtype",
+                "type": "nominal",
+                "scale": {
+                  "domain": ["Flash flood", "Flood (General)", "Riverine flood", "Landslide (wet)", "Drought"]
+                }
+              },
               "tooltip": [
                 {"field": "Disaster Subtype", "type": "nominal"},
                 {"field": "origin_tooltip", "type": "nominal", "title": "Origin"},
@@ -198,18 +204,36 @@
               {"filter": "datum.YEAR == year_selection"},
               {"aggregate": [{"op": "count", "as": "count"}]}
             ],
-            "mark": {
-              "type": "text",
-              "text": "No Data",
-              "color": "grey",
-              "fontSize": 20
-            },
-            "encoding": {
-              "opacity": {
-                "condition": {"test": "datum.count === 0", "value": 1},
-                "value": 0
+            "layer": [
+              {
+                "mark": {
+                  "type": "text",
+                  "fontSize": 40,
+                  "fontWeight": "bold"
+                },
+                "encoding": {
+                  "text": {"expr": "year_selection"},
+                  "opacity": {
+                    "condition": {"test": "datum.count > 0", "value": 1},
+                    "value": 0
+                  }
+                }
+              },
+              {
+                "mark": {
+                  "type": "text",
+                  "color": "grey",
+                  "fontSize": 20
+                },
+                "encoding": {
+                  "text": {"expr": "'No data for year ' + year_selection"},
+                  "opacity": {
+                    "condition": {"test": "datum.count === 0", "value": 1},
+                    "value": 0
+                  }
+                }
               }
-            }
+            ]
           }
         ]
       };
