@@ -32,7 +32,7 @@
       <div id="vis_area"></div>
     </div>
     <div class="vis-container">
-      <div id="vis_multiline"></div>
+      <div id="vis_multiline_density"></div>
     </div>
     <div class="source">
       Source:
@@ -350,35 +350,50 @@
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
 
-      const spec_multiline = {
+      const spec_multiline_density = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Total Annual Rainfall in East vs West Malaysia (2000-2021)",
+        "title": "Rainfall Density in East vs Peninsular Malaysia (2000-2021)",
         "width": 800,
         "height": 500,
         "data": { "url": "processed_rainfall_data.csv" },
         "transform": [
           {
-            "calculate": "datum.STATE == 'Sabah' || datum.STATE == 'Sarawak' || datum.STATE == 'Wilayah Persekutuan Labuan' ? 'East Malaysia' : 'West Malaysia'",
+            "lookup": "STATE",
+            "from": {
+              "data": { "url": "state_areas.csv" },
+              "key": "STATE",
+              "fields": ["AREA_KM2"]
+            }
+          },
+          {
+            "calculate": "datum.STATE == 'Sabah' || datum.STATE == 'Sarawak' || datum.STATE == 'Wilayah Persekutuan Labuan' ? 'East Malaysia' : 'Peninsular Malaysia'",
             "as": "Region"
           },
           {
-            "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
+            "aggregate": [
+              {"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"},
+              {"op": "sum", "field": "AREA_KM2", "as": "total_area"}
+            ],
             "groupby": ["YEAR", "Region"]
+          },
+          {
+            "calculate": "datum.total_rainfall / datum.total_area",
+            "as": "rainfall_density"
           }
         ],
         "mark": "line",
         "encoding": {
           "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
-          "y": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)" },
+          "y": { "field": "rainfall_density", "type": "quantitative", "title": "Rainfall Density (mm/km²)" },
           "color": { "field": "Region", "type": "nominal", "title": "Region" },
           "tooltip": [
               { "field": "YEAR", "type": "ordinal", "title": "Year" },
               { "field": "Region", "type": "nominal", "title": "Region" },
-              { "field": "total_rainfall", "type": "quantitative", "title": "Total Rainfall (mm)", "format": ".2f" }
+              { "field": "rainfall_density", "type": "quantitative", "title": "Rainfall Density (mm/km²)", "format": ".4f" }
           ]
         }
       };
-      vegaEmbed("#vis_multiline", spec_multiline, { actions: false });
+      vegaEmbed("#vis_multiline_density", spec_multiline_density, { actions: false });
     </script>
   </body>
 </html>
