@@ -173,10 +173,6 @@
             "name": "year_selection",
             "value": 2010,
             "bind": {"input": "range", "min": 2000, "max": 2021, "step": 1, "name": "Year"}
-          },
-          {
-            "name": "is_data_empty",
-            "expr": "length(data('donut_data')) == 0"
           }
         ],
         "layer": [
@@ -208,36 +204,31 @@
           },
           {
             "data": {"values": [{}]},
-            "mark": {"type": "text"},
+            "transform": [
+              {"calculate": "length(data('donut_data')) > 0", "as": "has_data"}
+            ],
+            "mark": {
+              "type": "text",
+              "fontWeight": "bold"
+            },
             "encoding": {
-              "text": {
-                "condition": {
-                  "test": "is_data_empty",
-                  "expr": "'No data for year ' + year_selection"
-                },
-                "expr": "year_selection"
-              },
-              "color": {
-                "condition": {
-                  "test": "is_data_empty",
-                  "value": "grey"
-                },
-                "value": "black"
-              },
-              "fontSize": {
-                "condition": {
-                  "test": "is_data_empty",
-                  "value": 20
-                },
-                "value": 40
-              },
-              "fontWeight": {
-                "condition": {
-                  "test": "is_data_empty",
-                  "value": "normal"
-                },
-                "value": "bold"
-              }
+              "text": {"expr": "year_selection"},
+              "color": {"value": "black"},
+              "size": {"value": 40},
+              "opacity": {"condition": {"test": "datum.has_data", "value": 1}, "value": 0}
+            }
+          },
+          {
+            "data": {"values": [{}]},
+            "transform": [
+              {"calculate": "length(data('donut_data')) == 0", "as": "is_empty"}
+            ],
+            "mark": "text",
+            "encoding": {
+              "text": {"expr": "'No data for year ' + year_selection"},
+              "color": {"value": "grey"},
+              "size": {"value": 20},
+              "opacity": {"condition": {"test": "datum.is_empty", "value": 1}, "value": 0}
             }
           }
         ]
