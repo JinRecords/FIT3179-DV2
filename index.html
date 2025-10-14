@@ -87,10 +87,9 @@
         {
           "data": {"url": "processed_rainfall_data.csv"},
           "transform": [
-            {"calculate": "datum.STATE == 'Melaka' ? 'Malacca' : (datum.STATE == 'Wilayah Persekutuan Labuan' ? 'Labuan' : datum.STATE)", "as": "geo_state_name"},
             {"filter": "datum.YEAR == year_selection"},
             {
-              "lookup": "geo_state_name",
+              "lookup": "STATE",
               "from": {
                 "data": {
                   "url": "ne_10m_admin_1_states_provinces.json",
