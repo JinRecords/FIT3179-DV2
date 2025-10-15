@@ -56,6 +56,7 @@
         width: 800,
         height: 500,
         background: "#e6f7ff",
+        transition: { duration: 500 },
         projection: {
           type: "mercator",
           scale: 2000,
@@ -64,7 +65,7 @@
         params: [
           {
             name: "year_selection",
-            value: 2010,
+            value: 2000,
             bind: {
               input: "range",
               min: 2000,
@@ -129,7 +130,7 @@
               },
               { filter: "datum.geo != null" },
             ],
-            mark: { type: "geoshape", transition: { duration: 500 } },
+            mark: { type: "geoshape" },
             encoding: {
               shape: { field: "geo", type: "geojson" },
               color: {
@@ -176,11 +177,12 @@
         title: "Disaster Subtypes",
         width: 400,
         height: 400,
+        transition: { duration: 500 },
         data: { url: "cleaned_disaster_data.csv" },
         params: [
           {
             name: "year_selection",
-            value: 2010,
+            value: 2000,
             bind: {
               input: "range",
               min: 2000,
@@ -210,7 +212,7 @@
                 as: "deaths_tooltip",
               },
             ],
-            mark: { type: "arc", innerRadius: 80, transition: { duration: 500 } },
+            mark: { type: "arc", innerRadius: 80 },
             encoding: {
               theta: { aggregate: "count", type: "quantitative" },
               color: {
