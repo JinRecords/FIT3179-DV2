@@ -138,6 +138,14 @@
             value: 2000,
           },
         ],
+        selection: {
+          state_hover: {
+            type: "single",
+            on: "mouseover",
+            clear: "mouseout",
+            fields: ["STATE"],
+          },
+        },
         layer: [
           {
             data: {
@@ -162,6 +170,18 @@
               },
             ],
             mark: { type: "geoshape", fill: "lightgray", stroke: "black" },
+          },
+          {
+            data: {
+              url: "https://jinrecords.github.io/FIT3179-Vega-lite-hw/ne_110m_graticules_1.json",
+              format: { type: "topojson", feature: "ne_110m_graticules_1" },
+            },
+            mark: {
+              type: "geoshape",
+              fill: "none",
+              stroke: "#E0E0E0",
+              strokeOpacity: 0.5,
+            },
           },
           {
             data: {
@@ -202,6 +222,10 @@
                 scale: { scheme: "blues", reverse: false },
                 legend: { title: "Annual Rainfall (mm)" },
               },
+              opacity: {
+                condition: { selection: "state_hover", value: 1 },
+                value: 0.7,
+              },
               tooltip: [
                 { field: "STATE", type: "nominal", title: "State" },
                 {
@@ -218,47 +242,62 @@
               ],
             },
           },
-          {
-            data: {
-              url: "https://jinrecords.github.io/FIT3179-Vega-lite-hw/ne_110m_graticules_1.json",
-              format: { type: "topojson", feature: "ne_110m_graticules_1" },
-            },
-            mark: {
-              type: "geoshape",
-              fill: "none",
-              stroke: "#E0E0E0",
-              strokeOpacity: 0.5,
-              interactive: false,
-            },
-          },
         ],
       };
-      vegaEmbed('#vis_map', spec_map, { renderer: 'svg' }).then(result => {
-        const view = result.view;
-        const slider = document.getElementById('year_slider_map');
-        const label = document.getElementById('year_label_map');
 
-        slider.addEventListener('input', () => {
+      let lollipopView;
+
+      vegaEmbed("#vis_map", spec_map, { renderer: "svg" }).then((result) => {
+        const view = result.view;
+        const slider = document.getElementById("year_slider_map");
+        const label = document.getElementById("year_label_map");
+
+        slider.addEventListener("input", () => {
           const year = parseInt(slider.value, 10);
           label.innerText = year;
 
           const previousData = new Map(
-            d3.select(view.container()).selectAll('.mark-geoshape.role-mark path').nodes()
-              .map(node => [node.__data__.datum.STATE, node.getAttribute('fill')])
+            d3
+              .select(view.container())
+              .selectAll(".mark-geoshape.role-mark path")
+              .nodes()
+              .map((node) => [
+                node.__data__.datum.STATE,
+                node.getAttribute("fill"),
+              ])
           );
 
-          view.signal('year_selection', year).runAsync().then(() => {
-            const paths = d3.select(view.container()).selectAll('.mark-geoshape.role-mark path');
+          view
+            .signal("year_selection", year)
+            .runAsync()
+            .then(() => {
+              const paths = d3
+                .select(view.container())
+                .selectAll(".mark-geoshape.role-mark path");
 
-            paths.each(function(d) {
-              const previousFill = previousData.get(d.datum.STATE);
-              if (previousFill) {
-                d3.select(this).attr('fill', previousFill);
-              }
+              paths.each(function (d) {
+                const previousFill = previousData.get(d.datum.STATE);
+                if (previousFill) {
+                  d3.select(this).attr("fill", previousFill);
+                }
+              });
+
+              paths.transition().duration(500).attr("fill", (d) => d.fill);
             });
+        });
 
-            paths.transition().duration(500).attr('fill', d => d.fill);
-          });
+        view.addSignalListener("state_hover", (name, value) => {
+          let state = "Malaysia";
+          if (value && value.STATE) {
+            state = value.STATE[0];
+          }
+          if (lollipopView) {
+            lollipopView.signal("state_selection", state).runAsync();
+            const dropdown = document.querySelector('select[name="State"]');
+            if (dropdown) {
+              dropdown.value = state;
+            }
+          }
         });
       });
 
@@ -375,31 +414,36 @@
           },
         ],
       };
-      vegaEmbed('#vis_donut', spec_donut, { renderer: 'svg' }).then(result => {
-        const view = result.view;
-        const slider = document.getElementById('year_slider_donut');
-        const label = document.getElementById('year_label_donut');
+      vegaEmbed("#vis_donut", spec_donut, { renderer: "svg" }).then(
+        (result) => {
+          const view = result.view;
+          const slider = document.getElementById("year_slider_donut");
+          const label = document.getElementById("year_label_donut");
 
-        slider.addEventListener('input', () => {
-          const year = parseInt(slider.value, 10);
-          label.innerText = year;
-          view.signal('year_selection', year).runAsync();
-        });
-      });
+          slider.addEventListener("input", () => {
+            const year = parseInt(slider.value, 10);
+            label.innerText = year;
+            view.signal("year_selection", year).runAsync();
+          });
+        }
+      );
 
       const spec_lollipop = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": {"text": "Total Annual Rainfall from 2000 - 2021", "subtitle": {"expr": "state_selection"}},
-        "width": 800,
-        "height": 500,
-        "data": { "url": "processed_rainfall_data.csv" },
-        "params": [
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: {
+          text: "Total Annual Rainfall from 2000 - 2021",
+          subtitle: { expr: "state_selection" },
+        },
+        width: 800,
+        height: 500,
+        data: { url: "processed_rainfall_data.csv" },
+        params: [
           {
-            "name": "state_selection",
-            "value": "Malaysia",
-            "bind": {
-              "input": "select",
-              "options": [
+            name: "state_selection",
+            value: "Malaysia",
+            bind: {
+              input: "select",
+              options: [
                 "Malaysia",
                 "Johor",
                 "Kedah",
@@ -415,95 +459,135 @@
                 "Sarawak",
                 "Selangor",
                 "Terengganu",
-                "Wilayah Persekutuan Labuan"
+                "Wilayah Persekutuan Labuan",
               ],
-              "name": "State"
-            }
-          }
+              name: "State",
+            },
+          },
         ],
-        "transform": [
-          { "filter": "state_selection == 'Malaysia' || datum.STATE == state_selection" },
+        transform: [
           {
-            "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
-            "groupby": ["YEAR"]
-          }
-        ],
-        "encoding": {
-          "y": { "field": "YEAR", "type": "ordinal", "title": "Year", "axis": { "grid": false } },
-          "x": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)", "axis": { "grid": true } }
-        },
-        "layer": [
-          {
-            "mark": "rule"
+            filter:
+              "state_selection == 'Malaysia' || datum.STATE == state_selection",
           },
           {
-            "mark": {
-              "type": "point",
-              "filled": true,
-              "size": 100
+            aggregate: [
+              { op: "sum", field: "ANNUAL RAINFALL", as: "total_rainfall" },
+            ],
+            groupby: ["YEAR"],
+          },
+        ],
+        encoding: {
+          y: {
+            field: "YEAR",
+            type: "ordinal",
+            title: "Year",
+            axis: { grid: false },
+          },
+          x: {
+            field: "total_rainfall",
+            type: "quantitative",
+            title: "Total Annual Rainfall (mm)",
+            axis: { grid: true },
+          },
+        },
+        layer: [
+          {
+            mark: "rule",
+          },
+          {
+            mark: {
+              type: "point",
+              filled: true,
+              size: 100,
             },
-            "encoding": {
-              "tooltip": [
-                  { "field": "YEAR", "type": "ordinal", "title": "Year" },
-                  { "field": "total_rainfall", "type": "quantitative", "title": "Total Rainfall (mm)", "format": ".2f" }
-              ]
-            }
-          }
-        ]
+            encoding: {
+              tooltip: [
+                { field: "YEAR", type: "ordinal", title: "Year" },
+                {
+                  field: "total_rainfall",
+                  type: "quantitative",
+                  title: "Total Rainfall (mm)",
+                  format: ".2f",
+                },
+              ],
+            },
+          },
+        ],
       };
-      vegaEmbed("#vis_lollipop", spec_lollipop, { actions: false });
+      vegaEmbed("#vis_lollipop", spec_lollipop, { actions: false }).then(
+        (result) => {
+          lollipopView = result.view;
+        }
+      );
 
       const spec_area = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Total Number of People Affected per Year",
-        "width": 800,
-        "height": 500,
-        "data": { "url": "cleaned_disaster_data.csv" },
-        "transform": [{
-          "aggregate": [{"op": "sum", "field": "Total Affected", "as": "total_affected"}],
-          "groupby": ["YEAR"]
-        }],
-        "encoding": {
-          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
-          "y": { "field": "total_affected", "type": "quantitative", "title": "Total Number of People Affected" }
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Total Number of People Affected per Year",
+        width: 800,
+        height: 500,
+        data: { url: "cleaned_disaster_data.csv" },
+        transform: [
+          {
+            aggregate: [
+              { op: "sum", field: "Total Affected", as: "total_affected" },
+            ],
+            groupby: ["YEAR"],
+          },
+        ],
+        encoding: {
+          x: { field: "YEAR", type: "ordinal", title: "Year" },
+          y: {
+            field: "total_affected",
+            type: "quantitative",
+            title: "Total Number of People Affected",
+          },
         },
-        "layer": [
-          { "mark": "area" },
-          { "mark": "line" },
-          { "mark": "point" }
-        ]
+        layer: [{ mark: "area" }, { mark: "line" }, { mark: "point" }],
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
 
       const spec_multiline_rainfall = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Average Annual Rainfall in East vs West Malaysia (2000-2021)",
-        "width": 800,
-        "height": 500,
-        "data": { "url": "cleaned_east_west.csv" },
-        "transform": [
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Average Annual Rainfall in East vs West Malaysia (2000-2021)",
+        width: 800,
+        height: 500,
+        data: { url: "cleaned_east_west.csv" },
+        transform: [
           {
-            "fold": ["West_Avg_Rainfall", "East_Avg_Rainfall"],
-            "as": ["Region", "Average_Rainfall"]
+            fold: ["West_Avg_Rainfall", "East_Avg_Rainfall"],
+            as: ["Region", "Average_Rainfall"],
           },
           {
-            "calculate": "datum.Region == 'West_Avg_Rainfall' ? 'West Malaysia' : 'East Malaysia'",
-            "as": "Region"
-          }
+            calculate:
+              "datum.Region == 'West_Avg_Rainfall' ? 'West Malaysia' : 'East Malaysia'",
+            as: "Region",
+          },
         ],
-        "mark": "line",
-        "encoding": {
-          "x": { "field": "year", "type": "ordinal", "title": "Year" },
-          "y": { "field": "Average_Rainfall", "type": "quantitative", "title": "Average Annual Rainfall (mm)" },
-          "color": { "field": "Region", "type": "nominal", "title": "Region" },
-          "tooltip": [
-              { "field": "year", "type": "ordinal", "title": "Year" },
-              { "field": "Region", "type": "nominal", "title": "Region" },
-              { "field": "Average_Rainfall", "type": "quantitative", "title": "Average Rainfall (mm)", "format": ".2f" }
-          ]
-        }
+        mark: "line",
+        encoding: {
+          x: { field: "year", type: "ordinal", title: "Year" },
+          y: {
+            field: "Average_Rainfall",
+            type: "quantitative",
+            title: "Average Annual Rainfall (mm)",
+          },
+          color: { field: "Region", type: "nominal", title: "Region" },
+          tooltip: [
+            { field: "year", type: "ordinal", title: "Year" },
+            { field: "Region", type: "nominal", title: "Region" },
+            {
+              field: "Average_Rainfall",
+              type: "quantitative",
+              title: "Average Rainfall (mm)",
+              format: ".2f",
+            },
+          ],
+        },
       };
-      vegaEmbed("#vis_multiline_density", spec_multiline_rainfall, { actions: false });
+      vegaEmbed("#vis_multiline_density", spec_multiline_rainfall, {
+        actions: false,
+      });
     </script>
   </body>
 </html>
