@@ -5,6 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.8"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
       .vis-container {
         display: flex;
@@ -22,7 +23,17 @@
       <div id="vis_map"></div>
     </div>
     <div class="vis-container">
+        <label for="year_slider_map">Year: </label>
+        <input id="year_slider_map" type="range" min="2000" max="2021" step="1" value="2000" />
+        <span id="year_label_map">2000</span>
+    </div>
+    <div class="vis-container">
       <div id="vis_donut"></div>
+    </div>
+    <div class="vis-container">
+        <label for="year_slider_donut">Year: </label>
+        <input id="year_slider_donut" type="range" min="2000" max="2021" step="1" value="2000" />
+        <span id="year_label_donut">2000</span>
     </div>
 
     <div class="vis-container">
@@ -56,7 +67,6 @@
         width: 800,
         height: 500,
         background: "#e6f7ff",
-        transition: { duration: 500 },
         projection: {
           type: "mercator",
           scale: 2000,
@@ -66,13 +76,6 @@
           {
             name: "year_selection",
             value: 2000,
-            bind: {
-              input: "range",
-              min: 2000,
-              max: 2021,
-              step: 1,
-              name: "Year",
-            },
           },
         ],
         layer: [
@@ -170,26 +173,45 @@
           },
         ],
       };
-      vegaEmbed("#vis_map", spec_map, { actions: false });
+      vegaEmbed('#vis_map', spec_map, { renderer: 'svg' }).then(result => {
+        const view = result.view;
+        const slider = document.getElementById('year_slider_map');
+        const label = document.getElementById('year_label_map');
+
+        slider.addEventListener('input', () => {
+          const year = parseInt(slider.value, 10);
+          label.innerText = year;
+          
+          const previousData = new Map(
+            d3.select(view.container()).selectAll('.mark-geoshape.role-mark path').nodes()
+              .map(node => [node.__data__.datum.STATE, node.getAttribute('fill')])
+          );
+
+          view.signal('year_selection', year).runAsync().then(() => {
+            const paths = d3.select(view.container()).selectAll('.mark-geoshape.role-mark path');
+            
+            paths.each(function(d) {
+              const previousFill = previousData.get(d.datum.STATE);
+              if (previousFill) {
+                d3.select(this).attr('fill', previousFill);
+              }
+            });
+
+            paths.transition().duration(500).attr('fill', d => d.fill);
+          });
+        });
+      });
 
       const spec_donut = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
         title: "Disaster Subtypes",
         width: 400,
         height: 400,
-        transition: { duration: 500 },
         data: { url: "cleaned_disaster_data.csv" },
         params: [
           {
             name: "year_selection",
             value: 2000,
-            bind: {
-              input: "range",
-              min: 2000,
-              max: 2021,
-              step: 1,
-              name: "Year",
-            },
           },
         ],
         layer: [
@@ -274,7 +296,7 @@
             },
           },
           {
-            data: { url: "cleaned_disaster_data.csv" },
+            data: { url: "cleaned.csv" },
             transform: [
               { filter: "datum.YEAR == year_selection" },
               { aggregate: [{ op: "count", as: "disaster_count" }] },
@@ -293,7 +315,17 @@
           },
         ],
       };
-      vegaEmbed("#vis_donut", spec_donut, { actions: false });
+      vegaEmbed('#vis_donut', spec_donut, { renderer: 'svg' }).then(result => {
+        const view = result.view;
+        const slider = document.getElementById('year_slider_donut');
+        const label = document.getElementById('year_label_donut');
+
+        slider.addEventListener('input', () => {
+          const year = parseInt(slider.value, 10);
+          label.innerText = year;
+          view.signal('year_selection', year).runAsync();
+        });
+      });
 
       const spec_lollipop = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
