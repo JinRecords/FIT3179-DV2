@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.8"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+      body { font-family: sans-serif; background: #fafafa; }
       .vis-container {
         display: flex;
         justify-content: center;
@@ -23,17 +24,17 @@
       <div id="vis_map"></div>
     </div>
     <div class="vis-container">
-        <label for="year_slider_map">Year: </label>
-        <input id="year_slider_map" type="range" min="2000" max="2021" step="1" value="2000" />
-        <span id="year_label_map">2000</span>
+      <label for="year_slider_map">Year: </label>
+      <input id="year_slider_map" type="range" min="2000" max="2021" step="1" value="2000" />
+      <span id="year_label_map">2000</span>
     </div>
     <div class="vis-container">
       <div id="vis_donut"></div>
     </div>
     <div class="vis-container">
-        <label for="year_slider_donut">Year: </label>
-        <input id="year_slider_donut" type="range" min="2000" max="2021" step="1" value="2000" />
-        <span id="year_label_donut">2000</span>
+      <label for="year_slider_donut">Year: </label>
+      <input id="year_slider_donut" type="range" min="2000" max="2021" step="1" value="2000" />
+      <span id="year_label_donut">2000</span>
     </div>
 
     <div class="vis-container">
@@ -52,8 +53,9 @@
         >https://www.kaggle.com/datasets/rajatjurel/malaysia-flood-dataset2000-2010/data</a
       >
     </div>
+
     <script type="text/javascript">
-      // Map visualization
+      // =================== MAP SPEC ===================
       const spec_map = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
         title: {
@@ -67,17 +69,8 @@
         width: 800,
         height: 500,
         background: "#e6f7ff",
-        projection: {
-          type: "mercator",
-          scale: 2000,
-          center: [109, 4.5],
-        },
-        params: [
-          {
-            name: "year_selection",
-            value: 2000,
-          },
-        ],
+        projection: { type: "mercator", scale: 2000, center: [109, 4.5] },
+        params: [{ name: "year_selection", value: 2000 }],
         layer: [
           {
             data: {
@@ -139,7 +132,7 @@
               color: {
                 field: "ANNUAL RAINFALL",
                 type: "quantitative",
-                scale: { scheme: "blues", reverse: false },
+                scale: { scheme: "blues" },
                 legend: { title: "Annual Rainfall (mm)" },
               },
               tooltip: [
@@ -173,259 +166,181 @@
           },
         ],
       };
-      vegaEmbed('#vis_map', spec_map, { renderer: 'svg' }).then(result => {
-        const view = result.view;
-        const slider = document.getElementById('year_slider_map');
-        const label = document.getElementById('year_label_map');
 
-        slider.addEventListener('input', () => {
-          const year = parseInt(slider.value, 10);
+      vegaEmbed("#vis_map", spec_map, { renderer: "svg" }).then((res) => {
+        const view = res.view;
+        const slider = document.getElementById("year_slider_map");
+        const label = document.getElementById("year_label_map");
+
+        slider.addEventListener("input", () => {
+          const year = +slider.value;
           label.innerText = year;
-          
-          const previousData = new Map(
-            d3.select(view.container()).selectAll('.mark-geoshape.role-mark path').nodes()
-              .map(node => [node.__data__.datum.STATE, node.getAttribute('fill')])
-          );
 
-          view.signal('year_selection', year).runAsync().then(() => {
-            const paths = d3.select(view.container()).selectAll('.mark-geoshape.role-mark path');
-            
-            paths.each(function(d) {
-              const previousFill = previousData.get(d.datum.STATE);
-              if (previousFill) {
-                d3.select(this).attr('fill', previousFill);
-              }
+          // fade out, update, fade in
+          const svg = d3.select(view.container()).select("svg");
+          svg.transition().duration(300).style("opacity", 0.2).on("end", () => {
+            view.signal("year_selection", year).runAsync().then(() => {
+              svg.transition().duration(500).style("opacity", 1);
             });
-
-            paths.transition().duration(500).attr('fill', d => d.fill);
           });
         });
       });
 
+      // =================== DONUT SPEC ===================
       const spec_donut = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
         title: "Disaster Subtypes",
         width: 400,
         height: 400,
         data: { url: "cleaned_disaster_data.csv" },
-        params: [
-          {
-            name: "year_selection",
-            value: 2000,
-          },
-        ],
+        params: [{ name: "year_selection", value: 2000 }],
         layer: [
           {
-            transform: [
-              { filter: "datum.YEAR == year_selection" },
-              {
-                calculate:
-                  "isValid(datum.Origin) && datum.Origin !== '' ? datum.Origin : 'No data'",
-                as: "origin_tooltip",
-              },
-              {
-                calculate:
-                  "isValid(datum['Total Affected']) ? datum['Total Affected'] : 'No data'",
-                as: "affected_tooltip",
-              },
-              {
-                calculate:
-                  "isValid(datum['Total Deaths']) ? datum['Total Deaths'] : 'No data'",
-                as: "deaths_tooltip",
-              },
-            ],
+            transform: [{ filter: "datum.YEAR == year_selection" }],
             mark: { type: "arc", innerRadius: 80 },
             encoding: {
               theta: { aggregate: "count", type: "quantitative" },
               color: {
                 field: "Disaster Subtype",
                 type: "nominal",
-                scale: {
-                  domain: [
-                    'Infectious disease (General)', 'Storm (General)', 'Viral disease',
-                    'Flash flood', 'Water', 'Flood (General)', 'Riverine flood',
-                    'Landslide (wet)', 'Lightning/Thunderstorms', 'Tsunami', 'Forest fire',
-                    'Drought', 'Ground movement'
-                  ],
-                  scheme: "category10",
-                },
                 legend: { title: "Disaster Type" },
               },
               tooltip: [
-                {
-                  field: "Disaster Subtype",
-                  type: "nominal",
-                  title: "Disaster Type",
-                },
-                { field: "origin_tooltip", type: "nominal", title: "Origin" },
-                {
-                  field: "affected_tooltip",
-                  type: "nominal",
-                  title: "Total Affected",
-                },
-                {
-                  field: "deaths_tooltip",
-                  type: "nominal",
-                  title: "Total Deaths",
-                },
+                { field: "Disaster Subtype", title: "Disaster Type" },
+                { field: "Origin", title: "Origin" },
+                { field: "Total Affected", title: "Total Affected" },
+                { field: "Total Deaths", title: "Total Deaths" },
               ],
             },
           },
-          {
-            data: { url: "cleaned_disaster_data.csv" },
-            transform: [
-              { filter: "datum.YEAR == year_selection" },
-              { aggregate: [{ op: "count", as: "disaster_count" }] },
-              {
-                calculate:
-                  "datum.disaster_count > 0 ? year_selection : 'No data'",
-                as: "display_text",
-              },
-              {
-                calculate: "datum.disaster_count > 0 ? 40 : 16",
-                as: "font_size",
-              },
-            ],
-            mark: {
-              type: "text",
-              fontSize: { expr: "datum.font_size" },
-              fontWeight: "bold",
-            },
-            encoding: {
-              text: { field: "display_text", type: "nominal" },
-            },
-          },
-          {
-            data: { url: "cleaned.csv" },
-            transform: [
-              { filter: "datum.YEAR == year_selection" },
-              { aggregate: [{ op: "count", as: "disaster_count" }] },
-              { filter: "datum.disaster_count == 0" },
-              { calculate: "'for ' + year_selection", as: "subtitle_text" },
-            ],
-            mark: {
-              type: "text",
-              dy: 20,
-              fontSize: 14,
-              color: "gray",
-            },
-            encoding: {
-              text: { field: "subtitle_text", type: "nominal" },
-            },
-          },
         ],
       };
-      vegaEmbed('#vis_donut', spec_donut, { renderer: 'svg' }).then(result => {
-        const view = result.view;
-        const slider = document.getElementById('year_slider_donut');
-        const label = document.getElementById('year_label_donut');
 
-        slider.addEventListener('input', () => {
-          const year = parseInt(slider.value, 10);
+      vegaEmbed("#vis_donut", spec_donut, { renderer: "svg" }).then((res) => {
+        const view = res.view;
+        const slider = document.getElementById("year_slider_donut");
+        const label = document.getElementById("year_label_donut");
+
+        slider.addEventListener("input", () => {
+          const year = +slider.value;
           label.innerText = year;
-          view.signal('year_selection', year).runAsync();
+
+          // same fade-in/out trick
+          const svg = d3.select(view.container()).select("svg");
+          svg.transition().duration(300).style("opacity", 0.2).on("end", () => {
+            view.signal("year_selection", year).runAsync().then(() => {
+              svg.transition().duration(500).style("opacity", 1);
+            });
+          });
         });
       });
 
+      // =================== LOLLIPOP ===================
       const spec_lollipop = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Total Annual Rainfall in Malaysia from 2000 - 2021",
-        "width": 800,
-        "height": 500,
-        "data": { "url": "processed_rainfall_data.csv" },
-        "transform": [{
-          "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
-          "groupby": ["YEAR"]
-        }],
-        "encoding": {
-          "y": { "field": "YEAR", "type": "ordinal", "title": "Year", "axis": { "grid": false } },
-          "x": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)", "axis": { "grid": true } }
-        },
-        "layer": [
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Total Annual Rainfall in Malaysia from 2000 - 2021",
+        width: 800,
+        height: 500,
+        data: { url: "processed_rainfall_data.csv" },
+        transform: [
           {
-            "mark": "rule"
+            aggregate: [
+              { op: "sum", field: "ANNUAL RAINFALL", as: "total_rainfall" },
+            ],
+            groupby: ["YEAR"],
           },
+        ],
+        encoding: {
+          y: { field: "YEAR", type: "ordinal", title: "Year" },
+          x: {
+            field: "total_rainfall",
+            type: "quantitative",
+            title: "Total Annual Rainfall (mm)",
+          },
+        },
+        layer: [
+          { mark: "rule" },
           {
-            "mark": {
-              "type": "point",
-              "filled": true,
-              "size": 100
+            mark: { type: "point", filled: true, size: 100 },
+            encoding: {
+              tooltip: [
+                { field: "YEAR", title: "Year" },
+                { field: "total_rainfall", title: "Total Rainfall (mm)" },
+              ],
             },
-            "encoding": {
-              "tooltip": [
-                  { "field": "YEAR", "type": "ordinal", "title": "Year" },
-                  { "field": "total_rainfall", "type": "quantitative", "title": "Total Rainfall (mm)", "format": ".2f" }
-              ]
-            }
-          }
-        ]
+          },
+        ],
       };
       vegaEmbed("#vis_lollipop", spec_lollipop, { actions: false });
 
+      // =================== AREA ===================
       const spec_area = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Total Number of People Affected per Year",
-        "width": 800,
-        "height": 500,
-        "data": { "url": "cleaned_disaster_data.csv" },
-        "transform": [{
-          "aggregate": [{"op": "sum", "field": "Total Affected", "as": "total_affected"}],
-          "groupby": ["YEAR"]
-        }],
-        "encoding": {
-          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
-          "y": { "field": "total_affected", "type": "quantitative", "title": "Total Number of People Affected" }
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Total Number of People Affected per Year",
+        width: 800,
+        height: 500,
+        data: { url: "cleaned_disaster_data.csv" },
+        transform: [
+          {
+            aggregate: [
+              { op: "sum", field: "Total Affected", as: "total_affected" },
+            ],
+            groupby: ["YEAR"],
+          },
+        ],
+        encoding: {
+          x: { field: "YEAR", type: "ordinal" },
+          y: {
+            field: "total_affected",
+            type: "quantitative",
+            title: "Total Number of People Affected",
+          },
         },
-        "layer": [
-          { "mark": "area" },
-          { "mark": "line" },
-          { "mark": "point" }
-        ]
+        layer: [{ mark: "area" }, { mark: "line" }, { mark: "point" }],
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
 
+      // =================== MULTILINE ===================
       const spec_multiline_density = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Rainfall Density in East vs Peninsular Malaysia (2000-2021)",
-        "width": 800,
-        "height": 500,
-        "data": { "url": "processed_rainfall_data.csv" },
-        "transform": [
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        title: "Rainfall Density in East vs Peninsular Malaysia (2000-2021)",
+        width: 800,
+        height: 500,
+        data: { url: "processed_rainfall_data.csv" },
+        transform: [
           {
-            "lookup": "STATE",
-            "from": {
-              "data": { "url": "state_areas.csv" },
-              "key": "STATE",
-              "fields": ["AREA_KM2"]
-            }
+            lookup: "STATE",
+            from: {
+              data: { url: "state_areas.csv" },
+              key: "STATE",
+              fields: ["AREA_KM2"],
+            },
           },
           {
-            "calculate": "datum.STATE == 'Sabah' || datum.STATE == 'Sarawak' || datum.STATE == 'Wilayah Persekutuan Labuan' ? 'East Malaysia' : 'Peninsular Malaysia'",
-            "as": "Region"
+            calculate:
+              "datum.STATE == 'Sabah' || datum.STATE == 'Sarawak' || datum.STATE == 'Wilayah Persekutuan Labuan' ? 'East Malaysia' : 'Peninsular Malaysia'",
+            as: "Region",
           },
           {
-            "aggregate": [
-              {"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"},
-              {"op": "sum", "field": "AREA_KM2", "as": "total_area"}
+            aggregate: [
+              { op: "sum", field: "ANNUAL RAINFALL", as: "total_rainfall" },
+              { op: "sum", field: "AREA_KM2", as: "total_area" },
             ],
-            "groupby": ["YEAR", "Region"]
+            groupby: ["YEAR", "Region"],
           },
-          {
-            "calculate": "datum.total_rainfall / datum.total_area",
-            "as": "rainfall_density"
-          }
+          { calculate: "datum.total_rainfall / datum.total_area", as: "rainfall_density" },
         ],
-        "mark": "line",
-        "encoding": {
-          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
-          "y": { "field": "rainfall_density", "type": "quantitative", "title": "Rainfall Density (mm/km²)" },
-          "color": { "field": "Region", "type": "nominal", "title": "Region" },
-          "tooltip": [
-              { "field": "YEAR", "type": "ordinal", "title": "Year" },
-              { "field": "Region", "type": "nominal", "title": "Region" },
-              { "field": "rainfall_density", "type": "quantitative", "title": "Rainfall Density (mm/km²)", "format": ".4f" }
-          ]
-        }
+        mark: "line",
+        encoding: {
+          x: { field: "YEAR", type: "ordinal" },
+          y: { field: "rainfall_density", type: "quantitative", title: "Rainfall Density (mm/km²)" },
+          color: { field: "Region", type: "nominal" },
+          tooltip: [
+            { field: "YEAR", title: "Year" },
+            { field: "Region", title: "Region" },
+            { field: "rainfall_density", title: "Rainfall Density (mm/km²)", format: ".4f" },
+          ],
+        },
       };
       vegaEmbed("#vis_multiline_density", spec_multiline_density, { actions: false });
     </script>
