@@ -129,7 +129,7 @@
               },
               { filter: "datum.geo != null" },
             ],
-            mark: { type: "geoshape" },
+            mark: { type: "geoshape", transition: { duration: 500 } },
             encoding: {
               shape: { field: "geo", type: "geojson" },
               color: {
@@ -210,7 +210,7 @@
                 as: "deaths_tooltip",
               },
             ],
-            mark: { type: "arc", innerRadius: 80 },
+            mark: { type: "arc", innerRadius: 80, transition: { duration: 500 } },
             encoding: {
               theta: { aggregate: "count", type: "quantitative" },
               color: {
