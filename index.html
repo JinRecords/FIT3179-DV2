@@ -1,129 +1,363 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Malaysia Rainfall Data</title>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.8"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaysia Rainfall &amp; Disaster Data 2000-2021</title>
+
+    <!-- Vega-Lite CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: #f5f5f5;
-      }
-      .container {
-        max-width: 1600px;
-        margin: 0 auto;
-        background-color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      }
-      .title-row {
-        text-align: center;
-        padding: 30px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-      .title-row h1 {
-        margin: 0;
-        font-size: 36px;
-        font-weight: bold;
-      }
-      .map-row {
-        padding: 40px;
-        background-color: #fafafa;
-      }
-      .map-controls {
-        text-align: center;
-        margin-top: 20px;
-      }
-      .two-column-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        padding: 40px;
-      }
-      .cell {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .controls {
-        text-align: center;
-        margin-top: 15px;
-      }
-      .info-block {
-        padding: 20px;
-        background-color: #f0f7ff;
-        border-left: 4px solid #667eea;
-        border-radius: 4px;
-        line-height: 1.8;
-      }
-      .info-block h3 {
-        margin-top: 0;
-        color: #667eea;
-      }
-      .source {
-        text-align: center;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-top: 1px solid #ddd;
-        font-size: 14px;
-        color: #666;
-      }
-      input[type="range"] {
-        width: 300px;
-        margin: 0 10px;
-      }
+        :root {
+            /* Design System Colors */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+
+            /* Semantic Colors */
+            --color-background: var(--color-gray-200);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+
+            /* Typography */
+            --font-family-serif: "Times New Roman", Times, serif;
+            --font-family-sans: "Arial", "Helvetica", sans-serif;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-base: 16px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+            --font-size-2xl: 32px;
+            --font-size-3xl: 48px;
+
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-48: 48px;
+            --space-64: 64px;
+
+            /* Border Radius */
+            --radius-base: 8px;
+            --radius-lg: 12px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-32);
+        }
+
+        /* Main Title */
+        .main-title {
+            font-family: var(--font-family-serif);
+            font-size: var(--font-size-3xl);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: var(--space-64);
+            color: var(--color-text);
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--space-16);
+        }
+
+        .section-header--center {
+            text-align: center;
+        }
+
+        .section-header--left {
+            text-align: left;
+        }
+
+        .section-header--right {
+            text-align: right;
+        }
+
+        /* Layout Sections */
+        .section {
+            margin-bottom: var(--space-64);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-48);
+            align-items: stretch;
+        }
+
+        .two-column > * {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .two-column > * > .vis-container,
+        .two-column > * > .explanatory-text {
+            flex-grow: 1;
+        }
+
+        /* Visualization Containers */
+        .vis-container {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--space-24);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .vis-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .vis-container--center {
+            text-align: center;
+        }
+
+        .vis-container--left {
+            text-align: left;
+        }
+
+        .vis-container--right {
+            text-align: right;
+        }
+
+        /* Text Content */
+        .explanatory-text {
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            line-height: 1.7;
+            color: var(--color-text);
+            padding: var(--space-24);
+            background-color: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .placeholder-text {
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            line-height: 1.7;
+            color: var(--color-text);
+            padding: var(--space-24);
+            background-color: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-top: var(--space-32);
+        }
+
+        /* Slider Controls */
+        .slider-container {
+            margin: var(--space-16) 0;
+            text-align: center;
+        }
+
+        .slider-label {
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-8);
+            display: block;
+        }
+
+        .year-slider {
+            width: 300px;
+            max-width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--color-gray-200);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .year-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+        }
+
+        .year-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .year-display {
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            margin-top: var(--space-8);
+            color: var(--color-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-16);
+            }
+
+            .main-title {
+                font-size: var(--font-size-2xl);
+                margin-bottom: var(--space-32);
+            }
+
+            .section-header {
+                font-size: var(--font-size-lg);
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: var(--space-24);
+            }
+
+            .section {
+                margin-bottom: var(--space-32);
+            }
+        }
+
+        /* Animation for smooth transitions */
+        .vis-container, .explanatory-text {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .vis-container:hover, .explanatory-text:hover {
+            transform: translateY(-2px);
+        }
     </style>
-  </head>
-  <body>
-    <div class="vis-container">
-      <div id="vis_map"></div>
-    </div>
-    <div class="vis-container">
-        <label for="year_slider_map">Year: </label>
-        <input id="year_slider_map" type="range" min="2000" max="2021" step="1" value="2000" />
-        <span id="year_label_map">2000</span>
-    </div>
-    <div class="vis-container">
-      <div id="vis_donut"></div>
-    </div>
-    <div class="vis-container">
-        <label for="year_slider_donut">Year: </label>
-        <input id="year_slider_donut" type="range" min="2000" max="2021" step="1" value="2000" />
-        <span id="year_label_donut">2000</span>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Title -->
+        <h1 class="main-title">RAINFALL AND ITS EFFECT IN MALAYSIA FROM 2000 - 2021</h1>
+
+        <!-- Section 1: Malaysian Rainfall Overview -->
+        <div class="section">
+            <h2 class="section-header section-header--center">MALAYSIAN RAINFALL OVERVIEW ANNUALLY</h2>
+            <div class="vis-container vis-container--center">
+                <div id="vis_map"></div>
+                <div class="slider-container">
+                    <label class="slider-label" for="year_slider_map">Select Year:</label>
+                    <input type="range" id="year_slider_map" class="year-slider" min="2000" max="2021" value="2010" step="1">
+                    <div id="year_display_map" class="year-display">2000</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Rainfall Trend and Annual Rainfall -->
+        <div class="section">
+            <div class="two-column">
+                <div>
+                    <h3 class="section-header section-header--center">Rainfall Trend and Impacts</h3>
+                    <div class="explanatory-text">
+                        Malaysia's climate is dominated by two monsoon seasons: the Southwest Monsoon (May-September) and the <strong>Northeast Monsoon (November-March)</strong>. The Northeast Monsoon brings particularly heavy rainfall, with some regions receiving <strong>over 3,000 mm</strong> during this period alone. This dataset highlights the annual variability in rainfall between 2000 and 2021. Periods of intense rainfall are a primary trigger for natural disasters such as <strong>riverine floods and landslides</strong>. These events can have significant impacts, as seen during the major floods of December 2014, which displaced over 200,000 people in several states.
+                    </div>
+                </div>
+                <div>
+                    <h3 class="section-header section-header--center">Annual Rainfall per region</h3>
+                    <div class="vis-container vis-container--right">
+                        <div id="vis_lollipop"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3 & 4: Disaster and Damages -->
+        <div class="section">
+            <div class="two-column">
+                <div>
+                    <h3 class="section-header section-header--center">Disaster Overtime</h3>
+                    <div class="vis-container vis-container--left">
+                        <div id="vis_donut"></div>
+                        <div class="slider-container">
+                            <label class="slider-label" for="year_slider_donut">Select Year:</label>
+                            <input type="range" id="year_slider_donut" class="year-slider" min="2000" max="2021" value="2000" step="1">
+                            <div id="year_display_donut" class="year-display">2000</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="section-header section-header--center">Damages Caused Each Year</h3>
+                    <div class="vis-container vis-container--right">
+                        <div id="vis_barchart_damage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: People Affected Chart -->
+        <div class="section">
+            <h2 class="section-header section-header--center">Total Number Of people Effected Each Year</h2>
+            <div class="vis-container vis-container--center">
+                <div id="vis_area"></div>
+            </div>
+            <div class="placeholder-text">
+                This chart illustrates the total number of people affected by natural disasters in Malaysia annually from 2000 to 2021. The peaks in the data often correspond to major flood events. For instance, a significant spike can be observed in <strong>2014</strong>, a year marked by one of the country's worst flood disasters in decades, affecting <strong>nearly half a million people</strong>. These year-on-year fluctuations demonstrate the unpredictable nature of climate-related hazards and highlight the critical importance of <strong>disaster preparedness and mitigation efforts</strong> to protect vulnerable populations.
+            </div>
+        </div>
+
+        <!-- Section 6: East vs West and Rainforest Text -->
+        <div class="section">
+            <div class="two-column">
+                <div>
+                    <h3 class="section-header section-header--center">Annual Rainfall (East vs West) Malaysia</h3>
+                    <div class="vis-container vis-container--left">
+                        <div id="vis_multiline_density"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="section-header section-header--center">Rainforest and Rainfall</h3>
+                    <div class="explanatory-text">
+                        The chart reveals a significant disparity in rainfall between Peninsular and East Malaysia. The eastern states of Sabah and Sarawak consistently receive higher average rainfall, often <strong>20-30% more</strong> than the peninsula. This is largely due to their mountainous topography and vast expanses of the <strong>Borneo rainforest</strong>, one of the oldest in the world. This ecosystem plays a crucial role in the water cycle through transpiration, contributing to higher atmospheric humidity and more frequent, intense precipitation, with annual averages in some areas <strong>exceeding 3,500 mm</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="vis-container">
-      <div id="vis_lollipop"></div>
-    </div>
-    <div class="vis-container">
-      <div id="vis_area"></div>
-    </div>
-    <div class="vis-container">
-      <div id="vis_multiline_density"></div>
-    </div>
-    <div class="source">
-      Source:
-      <a
-        href="https://www.kaggle.com/datasets/rajatjurel/malaysia-flood-dataset2000-2010/data"
-        >https://www.kaggle.com/datasets/rajatjurel/malaysia-flood-dataset2000-2010/data</a
-      >
-    </div>
-    <script type="text/javascript">
+<script type="text/javascript">
       // Map visualization
       const spec_map = {
-        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        title: {
-          text: "Annual Rainfall in Malaysia",
-          font: "serif",
-          fontSize: 30,
-          anchor: "middle",
-          frame: "bounds",
-          subtitle: { expr: "year_selection" },
-        },
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
         width: 800,
         height: 500,
         background: "#e6f7ff",
@@ -138,14 +372,6 @@
             value: 2000,
           },
         ],
-        selection: {
-          state_hover: {
-            type: "single",
-            on: "mouseover",
-            clear: "mouseout",
-            fields: ["STATE"],
-          },
-        },
         layer: [
           {
             data: {
@@ -219,12 +445,8 @@
               color: {
                 field: "ANNUAL RAINFALL",
                 type: "quantitative",
-                scale: { scheme: "blues", reverse: false },
+                scale: { scheme: "blues", reverse: false, domain: [1500, 5000] },
                 legend: { title: "Annual Rainfall (mm)" },
-              },
-              opacity: {
-                condition: { selection: "state_hover", value: 1 },
-                value: 0.7,
               },
               tooltip: [
                 { field: "STATE", type: "nominal", title: "State" },
@@ -246,56 +468,43 @@
       };
 
       let lollipopView;
+      let currentHoveredState = null;
+      let mapView;
+      let donutView;
 
       vegaEmbed("#vis_map", spec_map, { renderer: "svg" }).then((result) => {
-        const view = result.view;
+        mapView = result.view;
         const slider = document.getElementById("year_slider_map");
-        const label = document.getElementById("year_label_map");
+        const label = document.getElementById("year_display_map");
 
         slider.addEventListener("input", () => {
           const year = parseInt(slider.value, 10);
           label.innerText = year;
-
-          const previousData = new Map(
-            d3
-              .select(view.container())
-              .selectAll(".mark-geoshape.role-mark path")
-              .nodes()
-              .map((node) => [
-                node.__data__.datum.STATE,
-                node.getAttribute("fill"),
-              ])
-          );
-
-          view
-            .signal("year_selection", year)
-            .runAsync()
-            .then(() => {
-              const paths = d3
-                .select(view.container())
-                .selectAll(".mark-geoshape.role-mark path");
-
-              paths.each(function (d) {
-                const previousFill = previousData.get(d.datum.STATE);
-                if (previousFill) {
-                  d3.select(this).attr("fill", previousFill);
-                }
-              });
-
-              paths.transition().duration(500).attr("fill", (d) => d.fill);
-            });
+          mapView.signal("year_selection", year).runAsync();
         });
 
-        view.addSignalListener("state_hover", (name, value) => {
-          let state = "Malaysia";
-          if (value && value.STATE) {
-            state = value.STATE[0];
+        mapView.addEventListener('mouseover', (event, item) => {
+          if (item && item.datum && item.datum.STATE && item.datum.STATE !== currentHoveredState) {
+            currentHoveredState = item.datum.STATE;
+            if (lollipopView) {
+              lollipopView.signal('state_selection', currentHoveredState).runAsync();
+              const dropdown = document.querySelector('select[name="State"]');
+              if (dropdown) {
+                dropdown.value = currentHoveredState;
+              }
+            }
           }
-          if (lollipopView) {
-            lollipopView.signal("state_selection", state).runAsync();
-            const dropdown = document.querySelector('select[name="State"]');
-            if (dropdown) {
-              dropdown.value = state;
+        });
+
+        mapView.addEventListener('mouseout', (event, item) => {
+          if (item && item.datum && item.datum.STATE === currentHoveredState) {
+            currentHoveredState = null;
+            if (lollipopView) {
+              lollipopView.signal('state_selection', 'Malaysia').runAsync();
+              const dropdown = document.querySelector('select[name="State"]');
+              if (dropdown) {
+                dropdown.value = 'Malaysia';
+              }
             }
           }
         });
@@ -303,14 +512,13 @@
 
       const spec_donut = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        title: "Disaster Subtypes",
-        width: 400,
+        width: 300,
         height: 400,
         data: { url: "cleaned_disaster_data.csv" },
         params: [
           {
             name: "year_selection",
-            value: 2000,
+            value:2000,
           },
         ],
         layer: [
@@ -346,7 +554,7 @@
                     'Landslide (wet)', 'Lightning/Thunderstorms', 'Tsunami', 'Forest fire',
                     'Drought', 'Ground movement'
                   ],
-                  scheme: "category10",
+                  range: ["#1f77b4", "#ff7f0e", "#2ca02c", "black", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#1f77b4", "#ff7f0e", "yellow"],
                 },
                 legend: { title: "Disaster Type" },
               },
@@ -416,26 +624,22 @@
       };
       vegaEmbed("#vis_donut", spec_donut, { renderer: "svg" }).then(
         (result) => {
-          const view = result.view;
+          donutView = result.view;
           const slider = document.getElementById("year_slider_donut");
-          const label = document.getElementById("year_label_donut");
+          const label = document.getElementById("year_display_donut");
 
           slider.addEventListener("input", () => {
             const year = parseInt(slider.value, 10);
             label.innerText = year;
-            view.signal("year_selection", year).runAsync();
+            donutView.signal("year_selection", year).runAsync();
           });
         }
       );
 
       const spec_lollipop = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        title: {
-          text: "Total Annual Rainfall from 2000 - 2021",
-          subtitle: { expr: "state_selection" },
-        },
-        width: 800,
-        height: 500,
+        width: 533,
+        height: 333,
         data: { url: "processed_rainfall_data.csv" },
         params: [
           {
@@ -476,6 +680,10 @@
             ],
             groupby: ["YEAR"],
           },
+          {
+            window: [{ op: "max", field: "total_rainfall", as: "max_rainfall" }],
+            frame: [null, null],
+          },
         ],
         encoding: {
           y: {
@@ -490,27 +698,32 @@
             title: "Total Annual Rainfall (mm)",
             axis: { grid: true },
           },
+          tooltip: [
+            { field: "YEAR", type: "ordinal", title: "Year" },
+            {
+              field: "total_rainfall",
+              type: "quantitative",
+              title: "Total Rainfall (mm)",
+              format: ".2f",
+            },
+          ],
+          color: {
+            condition: {
+              test: "datum.total_rainfall === datum.max_rainfall",
+              value: "black",
+            },
+            value: "steelblue",
+          },
         },
         layer: [
           {
-            mark: "rule",
+            mark: { type: "rule", size: 3 },
           },
           {
             mark: {
               type: "point",
               filled: true,
-              size: 100,
-            },
-            encoding: {
-              tooltip: [
-                { field: "YEAR", type: "ordinal", title: "Year" },
-                {
-                  field: "total_rainfall",
-                  type: "quantitative",
-                  title: "Total Rainfall (mm)",
-                  format: ".2f",
-                },
-              ],
+              size: 200,
             },
           },
         ],
@@ -523,7 +736,6 @@
 
       const spec_area = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        title: "Total Number of People Affected per Year",
         width: 800,
         height: 500,
         data: { url: "cleaned_disaster_data.csv" },
@@ -536,22 +748,30 @@
           },
         ],
         encoding: {
-          x: { field: "YEAR", type: "ordinal", title: "Year" },
+          x: {
+            field: "YEAR",
+            type: "quantitative",
+            title: "Year",
+            axis: { format: "d" },
+          },
           y: {
             field: "total_affected",
             type: "quantitative",
             title: "Total Number of People Affected",
           },
         },
-        layer: [{ mark: "area" }, { mark: "line" }, { mark: "point" }],
+        layer: [
+          { mark: { type: "area", opacity: 0.3 } },
+          { mark: "line" },
+          { mark: "point" },
+        ],
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
 
       const spec_multiline_rainfall = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        title: "Average Annual Rainfall in East vs West Malaysia (2000-2021)",
-        width: 800,
-        height: 500,
+        width: 400,
+        height: 300,
         data: { url: "cleaned_east_west.csv" },
         transform: [
           {
@@ -588,6 +808,64 @@
       vegaEmbed("#vis_multiline_density", spec_multiline_rainfall, {
         actions: false,
       });
+
+      const spec_barchart_damage = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 400,
+        "height": 500,
+        "data": { "url": "cleaned_disaster_data.csv" },
+        "transform": [
+          { "filter": "datum['Total Damage (1K USD)'] != null && datum['Total Damage (1K USD)'] > 0" },
+          {
+            "aggregate": [{ "op": "sum", "field": "Total Damage (1K USD)", "as": "total_damage" }],
+            "groupby": ["YEAR"]
+          },
+          {
+            "window": [{"op": "max", "field": "total_damage", "as": "max_damage"}],
+            "frame": [null, null]
+          }
+        ],
+        "encoding": {
+          "x": { "field": "YEAR", "type": "ordinal", "title": "Year" },
+          "y": {
+            "field": "total_damage",
+            "type": "quantitative",
+            "title": "Total Damage (in 1000 USD)",
+            "scale": { "padding": 20 }
+          },
+          "tooltip": [
+            { "field": "YEAR", "type": "ordinal" },
+            { "field": "total_damage", "type": "quantitative", "title": "Total Damage (1k USD)", "format": ",.0f" }
+          ]
+        },
+        "layer": [
+          {
+            "mark": "bar",
+            "encoding": {
+              "color": {
+                "condition": {
+                  "test": "datum.total_damage === datum.max_damage",
+                  "value": "black"
+                },
+                "value": "steelblue"
+              }
+            }
+          },
+          {
+            "mark": {
+              "type": "text",
+              "align": "center",
+              "baseline": "bottom",
+              "dy": -5
+            },
+            "encoding": {
+              "text": { "field": "total_damage", "type": "quantitative", "format": ".2s" },
+              "color": { "value": "black" }
+            }
+          }
+        ]
+      };
+      vegaEmbed("#vis_barchart_damage", spec_barchart_damage, { actions: false });
     </script>
-  </body>
+</body>
 </html>
