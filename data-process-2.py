@@ -1,47 +1,52 @@
+
 import pandas as pd
+import numpy as np
 
-def clean_disaster_data(input_filename, output_filename):
-    """
-    Cleans the disaster data from the input CSV file and saves it to a new CSV file.
+# Load the dataset
+df = pd.read_csv('_202302280412050_2000-2021-mean-temperature-rainfall-volume-and-mean-relative-humidity-malaysia-(1).csv')
 
-    Args:
-        input_filename (str): The name of the source CSV file.
-        output_filename (str): The name of the file to save the cleaned data to.
-    """
-    try:
-        # Read the source CSV file into a pandas DataFrame
-        df = pd.read_csv(input_filename)
+# Clean column names
+df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace('-', '_').str.lower()
 
-        # Select and rename the desired columns
-        # Create a copy to avoid SettingWithCopyWarning
-        df_cleaned = df[['Start Year', 'Disaster Subtype', 'Origin', 'Total Deaths', 'Total Affected', "Total Damage ('000 US$)"]].copy()
+# Define West and East Malaysia states
+west_malaysia_states = [
+    'Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan',
+    'Pahang', 'Perak', 'Perlis', 'Pulau Pinang', 'Selangor', 'Terengganu'
+]
+east_malaysia_states = ['Sabah', 'Sarawak', 'Wilayah Persekutuan Labuan']
 
-        # Rename the columns to the desired format
-        df_cleaned.rename(columns={
-            'Start Year': 'YEAR',
-            "Total Damage ('000 US$)": 'Total Damage (1K USD)'
-        }, inplace=True)
+# Function to classify states
+def get_region(state):
+    if state in west_malaysia_states:
+        return 'West'
+    elif state in east_malaysia_states:
+        return 'East'
+    else:
+        return 'Unknown'
 
-        # Save the cleaned DataFrame to a new CSV file
-        df_cleaned.to_csv(output_filename, index=False)
+# Apply the function to create a 'region' column
+df['region'] = df['state'].apply(get_region)
 
-        print(f"Data cleaning complete. Cleaned data saved to '{output_filename}'")
-        print("\nHere is a preview of the cleaned data:")
-        print(df_cleaned.head())
+# Column to process
+rainfall_col = 'total_rainfall_in_millimetres'
 
-    except FileNotFoundError:
-        print(f"Error: The file '{input_filename}' was not found.")
-        print("Please make sure the file is in the same directory as the script.")
-    except KeyError as e:
-        print(f"Error: A required column was not found in the CSV file: {e}")
-        print("Please check the column names in your source file.")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+# Replace non-numeric placeholders with NaN
+df[rainfall_col] = pd.to_numeric(df[rainfall_col], errors='coerce')
 
-if __name__ == "__main__":
-    # Define the input and output filenames
-    source_file = 'public_emdat_custom_request_2025-09-25_30f04d7a-5e31-4ed8-ad6d-30fab9e03773.csv'
-    cleaned_file = 'cleaned_disaster_data.csv'
+# Drop rows with missing values in the rainfall column
+df.dropna(subset=[rainfall_col], inplace=True)
 
-    # Run the cleaning function
-    clean_disaster_data(source_file, cleaned_file)
+# Group by year and region, then calculate the mean of the total_rainfall_in_millimetres
+yearly_regional_rainfall = df.groupby(['year', 'region'])[rainfall_col].mean().reset_index()
+
+# Pivot the table to have regions as columns
+pivot_df = yearly_regional_rainfall.pivot(index='year', columns='region', values=rainfall_col).reset_index()
+pivot_df.columns.name = None
+pivot_df = pivot_df.rename(columns={'West': 'West_Avg_Rainfall', 'East': 'East_Avg_Rainfall'})
+
+
+# Save the cleaned data
+pivot_df.to_csv('cleaned_east_west.csv', index=False)
+
+print("Data cleaning and processing for rainfall complete. Output saved to cleaned_east_west.csv")
+print(pivot_df.head())
