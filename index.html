@@ -389,14 +389,45 @@
 
       const spec_lollipop = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title": "Total Annual Rainfall in Malaysia from 2000 - 2021",
+        "title": {"text": "Total Annual Rainfall from 2000 - 2021", "subtitle": {"expr": "state_selection"}},
         "width": 800,
         "height": 500,
         "data": { "url": "processed_rainfall_data.csv" },
-        "transform": [{
-          "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
-          "groupby": ["YEAR"]
-        }],
+        "params": [
+          {
+            "name": "state_selection",
+            "value": "Malaysia",
+            "bind": {
+              "input": "select",
+              "options": [
+                "Malaysia",
+                "Johor",
+                "Kedah",
+                "Kelantan",
+                "Kuala Lumpur",
+                "Melaka",
+                "Negeri Sembilan",
+                "Pahang",
+                "Perak",
+                "Perlis",
+                "Pulau Pinang",
+                "Sabah",
+                "Sarawak",
+                "Selangor",
+                "Terengganu",
+                "Wilayah Persekutuan Labuan"
+              ],
+              "name": "State"
+            }
+          }
+        ],
+        "transform": [
+          { "filter": "state_selection == 'Malaysia' || datum.STATE == state_selection" },
+          {
+            "aggregate": [{"op": "sum", "field": "ANNUAL RAINFALL", "as": "total_rainfall"}],
+            "groupby": ["YEAR"]
+          }
+        ],
         "encoding": {
           "y": { "field": "YEAR", "type": "ordinal", "title": "Year", "axis": { "grid": false } },
           "x": { "field": "total_rainfall", "type": "quantitative", "title": "Total Annual Rainfall (mm)", "axis": { "grid": true } }
