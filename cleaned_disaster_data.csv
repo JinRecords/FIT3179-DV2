@@ -1,13 +1,11 @@
 YEAR,Disaster Subtype,Origin,Total Deaths,Total Affected,Total Damage (1K USD)
-2000,Infectious disease (General),,2,480,
 2000,Storm (General),,,500,
-2000,Viral disease,,2,508,
 2000,Flash flood,Brief torrential rain,12,8000,1000
 2000,Water,,53,,
 2001,Water,,14,,
 2001,Flash flood,,,10000,
-2001,Flood (General),,,5000,
-2001,Flood (General),,,200,
+2001,Flash flood,,,5000,
+2001,Flash flood,,,200,
 2001,Riverine flood,Heavy rain,11,18000,
 2002,Landslide (wet),,10,,
 2002,Lightning/Thunderstorms,,2,155,
@@ -20,7 +18,6 @@ YEAR,Disaster Subtype,Origin,Total Deaths,Total Affected,Total Damage (1K USD)
 2004,Storm (General),,1,40000,
 2004,Riverine flood,Monsoonal rain,13,15000,10000
 2004,Tsunami,,80,5063,500000
-2005,Forest fire,,,,
 2005,Flash flood,Brief torrential rain,4,600,
 2005,Flash flood,Heavy rains,9,30000,
 2006,Riverine flood,Heavy rains,,1112,
@@ -28,7 +25,6 @@ YEAR,Disaster Subtype,Origin,Total Deaths,Total Affected,Total Damage (1K USD)
 2006,Riverine flood,Heavy rain,,500,
 2006,Flash flood,Monsoonal rain,6,100000,22000
 2007,Riverine flood,Monsoonal rain,17,137533,605000
-2007,Viral disease,,56,,
 2007,Riverine flood,Monsoonal rain,29,29000,363000
 2008,Riverine flood,Heavy rains,,2000,
 2008,Flash flood,Heavy rain,,6000,
@@ -51,33 +47,33 @@ YEAR,Disaster Subtype,Origin,Total Deaths,Total Affected,Total Damage (1K USD)
 2015,Ground movement,,24,10,2
 2015,Water,,61,,
 2016,Water,,18,,
-2016,Flood (General),Heavy monsoonal rains,,6000,
+2016,Flash flood,Heavy monsoonal rains,,6000,
 2016,Water,,28,34,
-2016,Flood (General),Torrential rain,,441,
-2016,Flood (General),Heavy rains,,400,
-2016,Flood (General),Continous rains,,25000,132000
+2016,Flash flood,Torrential rain,,441,
+2016,Flash flood,Heavy rains,,400,
+2016,Flash flood,Continous rains,,25000,132000
 2017,Water,,40,2,
-2017,Flood (General),Heavy rains,,5481,
-2017,Flood (General),Heavy rain,7,3500,
+2017,Flash flood,Heavy rains,,5481,
+2017,Flash flood,Heavy rain,7,3500,
 2017,Riverine flood,Heavy rains,2,13000,
 2017,Storm (General),,,426,
 2018,Flash flood,Heavy rains,,4900,
-2018,Flood (General),Monsoonal rains,2,12000,
-2019,Flood (General),Heavy rains,,1000,
-2019,Flood (General),,,2412,
-2019,Flood (General),Heavy rains,2,15000,
-2019,Flood (General),Heavy rains,,4065,
-2020,Flood (General),Heavy rains,,2000,
-2020,Flood (General),Heavy rains,,9000,6800
-2020,Flood (General),Heavy rains,,1210,
-2020,Flood (General),,,400,
+2018,Flash flood,Monsoonal rains,2,12000,
+2019,Flash flood,Heavy rains,,1000,
+2019,Flash flood,,,2412,
+2019,Flash flood,Heavy rains,2,15000,
+2019,Flash flood,Heavy rains,,4065,
+2020,Flash flood,Heavy rains,,2000,
+2020,Flash flood,Heavy rains,,9000,6800
+2020,Flash flood,Heavy rains,,1210,
+2020,Flash flood,,,400,
 2020,Riverine flood,,,9273,
-2021,Flood (General),Heavy rains,6,3000,
-2021,Flood (General),Heavy rains,,6000,
-2021,Flood (General),,8,23776,
-2021,Flood (General),Heavy rains,,5782,
+2021,Flash flood,Heavy rains,6,3000,
+2021,Flash flood,Heavy rains,,6000,
+2021,Flash flood,,8,23776,
+2021,Flash flood,Heavy rains,,5782,
 2021,Flash flood,Heavy rains,7,4828,
-2021,Flood (General),Heavy rains,2,255,
+2021,Flash flood,Heavy rains,2,255,
 2021,Flash flood,Heavy rains,,1000,
 2021,Water,,38,,
 2021,Flash flood,"Heavy rains, Tropical Depression TWENTYNINE",56,120000,146000
