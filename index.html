@@ -159,7 +159,7 @@
       /* Text Content */
       .explanatory-text {
         font-family: var(--font-family-sans);
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-xl);
         line-height: 1.7;
         color: var(--color-text);
         padding: var(--space-24);
@@ -170,7 +170,7 @@
 
       .placeholder-text {
         font-family: var(--font-family-sans);
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-xl);
         line-height: 1.7;
         color: var(--color-text);
         padding: var(--space-24);
@@ -273,7 +273,7 @@
     <div class="container">
       <!-- Main Title -->
       <h1 class="main-title">
-        RAINFALL AND ITS EFFECT IN MALAYSIA (2000 - 2021)
+        RAINFALL AND ITS EFFECT IN MALAYSIA <span style="font-size: var(--font-size-xl);">(2000 - 2021)</span>
       </h1>
 
       <!-- Section 1: Malaysian Rainfall Overview -->
@@ -309,18 +309,7 @@
               Rainfall Trend and Impacts
             </h3>
             <div class="explanatory-text">
-              Malaysia's climate is dominated by two monsoon seasons: the
-              Southwest Monsoon (May-September) and the
-              <strong>Northeast Monsoon (November-March)</strong>. The Northeast
-              Monsoon brings particularly heavy rainfall, with some regions
-              receiving <strong>over 3,000 mm</strong> during this period alone.
-              This dataset highlights the annual variability in rainfall between
-              2000 and 2021. Periods of intense rainfall are a primary trigger
-              for natural disasters such as
-              <strong>riverine floods and landslides</strong>. These events can
-              have significant impacts, as seen during the major floods of
-              December 2014, which displaced over 200,000 people in several
-              states.
+              Malaysia's climate has <strong>two monsoon seasons</strong>, with the <strong>Northeast Monsoon</strong> bringing heavy rainfall (<strong>over 3,000 mm</strong>) that can trigger <strong>floods and landslides</strong>. The <strong>2014 floods</strong> are a key example, displacing <strong>over 200,000 people</strong>.
             </div>
           </div>
           <div>
@@ -380,16 +369,7 @@
           <div id="vis_area"></div>
         </div>
         <div class="placeholder-text">
-          This chart illustrates the total number of people affected by natural
-          disasters in Malaysia annually from 2000 to 2021. The peaks in the
-          data often correspond to major flood events. For instance, a
-          significant spike can be observed in <strong>2014</strong>, a year
-          marked by one of the country's worst flood disasters in decades,
-          affecting <strong>nearly half a million people</strong>. These
-          year-on-year fluctuations demonstrate the unpredictable nature of
-          climate-related hazards and highlight the critical importance of
-          <strong>disaster preparedness and mitigation efforts</strong> to
-          protect vulnerable populations.
+          The chart shows the annual number of people in Malaysia affected by natural disasters from <strong>2000-2021</strong>. Peaks, like the one in <strong>2014</strong> that affected <strong>nearly half a million people</strong>, are tied to <strong>major floods</strong>, highlighting the need for <strong>disaster preparedness</strong>.
         </div>
       </div>
 
@@ -409,16 +389,7 @@
               Rainforest and Rainfall
             </h3>
             <div class="explanatory-text">
-              The chart reveals a significant disparity in rainfall between
-              Peninsular and East Malaysia. The eastern states of Sabah and
-              Sarawak consistently receive higher average rainfall, often
-              <strong>20-30% more</strong> than the peninsula. This is largely
-              due to their mountainous topography and vast expanses of the
-              <strong>Borneo rainforest</strong>, one of the oldest in the
-              world. This ecosystem plays a crucial role in the water cycle
-              through transpiration, contributing to higher atmospheric humidity
-              and more frequent, intense precipitation, with annual averages in
-              some areas <strong>exceeding 3,500 mm</strong>.
+              <strong>East Malaysia</strong> (Sabah and Sarawak) gets <strong>20-30% more rain</strong> than Peninsular Malaysia. This is due to the <strong>Borneo rainforest</strong> and mountains, which increase humidity and rainfall, with some areas <strong>exceeding 3,500 mm</strong> annually.
             </div>
           </div>
         </div>
@@ -521,7 +492,7 @@
                   reverse: false,
                   domain: [1500, 5000],
                 },
-                legend: { title: "Annual Rainfall (mm)" },
+                legend: { title: "Annual Rainfall (mm)", titleFontSize: 16, labelFontSize: 12 },
               },
               tooltip: [
                 { field: "STATE", type: "nominal", title: "State" },
@@ -625,14 +596,14 @@
             ],
             mark: { type: "arc", innerRadius: 80 },
             encoding: {
-              theta: { aggregate: "count", type: "quantitative" },
+              theta: { aggregate: "count", "field": "Disaster Subtype", "type": "quantitative" },
               color: {
                 field: "Disaster Subtype",
                 type: "nominal",
                 scale: {
                   scheme: "category10"
                 },
-                legend: { title: "Disaster Type" },
+                legend: { title: "Disaster Type", titleFontSize: 16, labelFontSize: 12 },
               },
               tooltip: [
                 {
@@ -653,6 +624,16 @@
                 },
               ],
             },
+          },
+          {
+            "transform": [
+              { "filter": "datum.YEAR == year_selection" }
+            ],
+            "mark": {"type": "text", "radius": 110, "fill": "black"},
+            "encoding": {
+              "theta": {"field": "Disaster Subtype", "aggregate": "count", "type": "quantitative", "stack": true},
+              "text": {"field": "Disaster Subtype", "type": "nominal"}
+            }
           },
           {
             data: { url: "cleaned_disaster_data.csv" },
@@ -768,13 +749,13 @@
             field: "YEAR",
             type: "ordinal",
             title: "Year",
-            axis: { grid: false },
+            axis: { grid: false, titleFontSize: 16, labelFontSize: 14 },
           },
           x: {
             field: "total_rainfall",
             type: "quantitative",
             title: "Total Annual Rainfall (mm)",
-            axis: { grid: true },
+            axis: { grid: true, titleFontSize: 16, labelFontSize: 14 },
           },
           tooltip: [
             { field: "YEAR", type: "ordinal", title: "Year" },
@@ -815,7 +796,7 @@
       const spec_area = {
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
         width: 800,
-        height: 500,
+        height: 300,
         data: { url: "cleaned_disaster_data.csv" },
         transform: [
           {
@@ -825,24 +806,97 @@
             groupby: ["YEAR"],
           },
         ],
-        encoding: {
-          x: {
-            field: "YEAR",
-            type: "quantitative",
-            title: "Year",
-            axis: { format: "d" },
-          },
-          y: {
-            field: "total_affected",
-            type: "quantitative",
-            title: "Total Number of People Affected",
-          },
-        },
         layer: [
-          { mark: { type: "area", opacity: 0.3 } },
-          { mark: "line" },
-          { mark: "point" },
-        ],
+          {
+            mark: { type: "area", opacity: 0.3 },
+            encoding: {
+              x: {
+                field: "YEAR",
+                type: "quantitative",
+                title: "Year",
+                axis: { format: "d", titleFontSize: 16, labelFontSize: 14 },
+              },
+              y: {
+                field: "total_affected",
+                type: "quantitative",
+                title: "Total Number of People Affected",
+                axis: { titleFontSize: 16, labelFontSize: 12 },
+              },
+            },
+          },
+          {
+            mark: "line",
+            encoding: {
+              x: {
+                field: "YEAR",
+                type: "quantitative",
+                title: "Year",
+                axis: { format: "d" },
+              },
+              y: {
+                field: "total_affected",
+                type: "quantitative",
+                title: "Total Number of People Affected",
+              },
+            },
+          },
+          {
+            mark: "point",
+            encoding: {
+              x: {
+                field: "YEAR",
+                type: "quantitative",
+                title: "Year",
+                axis: { format: "d" },
+              },
+              y: {
+                field: "total_affected",
+                type: "quantitative",
+                title: "Total Number of People Affected",
+              },
+              tooltip: [
+                { field: "YEAR", type: "quantitative", title: "Year" },
+                {
+                  field: "total_affected",
+                  type: "quantitative",
+                  title: "Total Affected",
+                  format: ",.0f",
+                },
+              ],
+            },
+          },
+          {
+            data: { values: [{ "YEAR": 2014 }] },
+            mark: {
+              type: "rule",
+              stroke: "red",
+              strokeDash: [5, 5],
+              size: 2,
+            },
+            encoding: {
+              x: { field: "YEAR", type: "quantitative" },
+            },
+          },
+          {
+            data: { values: [{"YEAR": 2014, "total_affected": 260000}] },
+            mark: {
+              type: "text",
+              align: "right",
+              baseline: "middle",
+              dx: -15,
+              fontSize: 14,
+              text: [
+                "2014 floods displaced over 200,000 people,",
+                "killed at least 13, and devastated Kelantan",
+                "and neighboring states with record rainfall"
+              ]
+            },
+            encoding: {
+              x: { field: "YEAR", type: "quantitative" },
+              y: { field: "total_affected", type: "quantitative"}
+            }
+          }
+        ]
       };
       vegaEmbed("#vis_area", spec_area, { actions: false });
 
@@ -850,38 +904,97 @@
         $schema: "https://vega.github.io/schema/vega-lite/v5.json",
         width: 400,
         height: 300,
-        data: { url: "cleaned_east_west.csv" },
-        transform: [
+        layer: [
           {
-            fold: ["West_Avg_Rainfall", "East_Avg_Rainfall"],
-            as: ["Region", "Average_Rainfall"],
-          },
-          {
-            calculate:
-              "datum.Region == 'West_Avg_Rainfall' ? 'West Malaysia' : 'East Malaysia'",
-            as: "Region",
-          },
-        ],
-        mark: "line",
-        encoding: {
-          x: { field: "year", type: "ordinal", title: "Year" },
-          y: {
-            field: "Average_Rainfall",
-            type: "quantitative",
-            title: "Average Annual Rainfall (mm)",
-          },
-          color: { field: "Region", type: "nominal", title: "Region" },
-          tooltip: [
-            { field: "year", type: "ordinal", title: "Year" },
-            { field: "Region", type: "nominal", title: "Region" },
-            {
-              field: "Average_Rainfall",
-              type: "quantitative",
-              title: "Average Rainfall (mm)",
-              format: ".2f",
+            data: { url: "cleaned_east_west.csv" },
+            transform: [
+              {
+                fold: ["West_Avg_Rainfall", "East_Avg_Rainfall"],
+                as: ["Region", "Average_Rainfall"],
+              },
+              {
+                calculate:
+                  "datum.Region == 'West_Avg_Rainfall' ? 'West Malaysia' : 'East Malaysia'",
+                as: "Region",
+              },
+            ],
+            mark: "line",
+            encoding: {
+              x: { field: "year", type: "quantitative", title: "Year", axis: {format: "d", titleFontSize: 16, labelFontSize: 14} },
+              y: {
+                field: "Average_Rainfall",
+                type: "quantitative",
+                title: "Average Annual Rainfall (mm)",
+                axis: { titleFontSize: 16, labelFontSize: 14 },
+              },
+              color: { field: "Region", type: "nominal", title: "Region", legend: { titleFontSize: 16, labelFontSize: 12 } },
             },
-          ],
-        },
+          },
+          {
+            data: { url: "cleaned_east_west.csv" },
+            transform: [
+              {
+                fold: ["West_Avg_Rainfall", "East_Avg_Rainfall"],
+                as: ["Region", "Average_Rainfall"],
+              },
+              {
+                calculate:
+                  "datum.Region == 'West_Avg_Rainfall' ? 'West Malaysia' : 'East Malaysia'",
+                as: "Region",
+              },
+            ],
+            mark: {
+              type: "line",
+              stroke: "transparent",
+              strokeWidth: 10
+            },
+            encoding: {
+              x: { field: "year", type: "quantitative" },
+              y: { field: "Average_Rainfall", type: "quantitative" },
+              color: { field: "Region", type: "nominal" },
+              tooltip: [
+                { field: "year", type: "quantitative", title: "Year" },
+                { field: "Region", type: "nominal", title: "Region" },
+                {
+                  field: "Average_Rainfall",
+                  type: "quantitative",
+                  title: "Average Rainfall (mm)",
+                  format: ".2f",
+                },
+              ],
+            }
+          },
+          {
+            data: { values: [{ "year": 2019 }] },
+            mark: {
+              type: "rule",
+              stroke: "red",
+              strokeDash: [5, 5],
+              size: 2,
+            },
+            encoding: {
+              x: { field: "year", type: "quantitative" },
+            },
+          },
+          {
+            data: { values: [{"year": 2019, "Average_Rainfall": 1000}] },
+            mark: {
+              type: "text",
+              align: "right",
+              baseline: "bottom",
+              dx: -15,
+              fontSize: 14,
+              text: [
+                "Many weather station closed due to covid 19,",
+                "leading to missing/wrong data"
+              ]
+            },
+            encoding: {
+              x: { field: "year", type: "quantitative" },
+              y: { field: "Average_Rainfall", type: "quantitative"}
+            }
+          }
+        ],
       };
       vegaEmbed("#vis_multiline_density", spec_multiline_rainfall, {
         actions: false,
@@ -909,11 +1022,12 @@
           },
         ],
         encoding: {
-          x: { field: "YEAR", type: "ordinal", title: "Year" },
+          x: { field: "YEAR", type: "ordinal", title: "Year", axis: { titleFontSize: 16, labelFontSize: 14 } },
           y: {
             field: "total_damage",
             type: "quantitative",
             title: "Total Damage (in 1000 USD)",
+            axis: { titleFontSize: 16, labelFontSize: 14 },
             scale: { padding: 20 },
           },
           tooltip: [
@@ -955,6 +1069,25 @@
               color: { value: "black" },
             },
           },
+          {
+            "transform": [
+              { "filter": "datum.YEAR == 2007" }
+            ],
+            "mark": {
+              "type": "text",
+              "align": "left",
+              "baseline": "top",
+              "dx": 40,
+              "dy": 0,
+              "fontSize": 14,
+              "text": [
+                "In 2007, Malaysia suffered severe floods,",
+                "mostly in Johor, killing dozens,",
+                "displacing thousands, and",
+                "causing massive infrastructure damage."
+              ]
+            }
+          }
         ],
       };
       vegaEmbed("#vis_barchart_damage", spec_barchart_damage, {
@@ -963,3 +1096,4 @@
     </script>
   </body>
 </html>
+
